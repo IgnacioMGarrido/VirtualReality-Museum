@@ -26,10 +26,15 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 private:
+	void UpdateDestinationMarker();
+
 	void MoveForward(float throttle);
 	void MoveRight(float throttle);
-	void UpdateDestinationMarker();
+	void BeginTeleport();
+
+	void TeleportFinish();
 private:
+
 	UPROPERTY(VisibleAnywhere)
 	class UCameraComponent* Camera;
 	
@@ -41,4 +46,9 @@ private:
 	
 	UPROPERTY(EditAnywhere)
 	float MaxTeleportDistance = 1000.0f;
+
+	UPROPERTY(EditAnywhere)
+	float FadeDuration = 1.0f;
+	
+
 };
