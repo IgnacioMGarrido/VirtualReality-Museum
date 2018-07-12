@@ -27,7 +27,8 @@ AVRCharacter::AVRCharacter()
 void AVRCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	DestinationMarker->SetVisibility(false);
+
 }
 
 // Called every frame
@@ -55,9 +56,13 @@ void AVRCharacter::UpdateDestinationMarker()
 		EndLocation,
 		ECollisionChannel::ECC_Visibility
 	);
-	DrawDebugLine(GetWorld(), StartLocation, EndLocation, FColor::Green);
-	if (isHitLocation)
+	if (isHitLocation) {
 		DestinationMarker->SetWorldLocation(HitResult.Location);
+		DestinationMarker->SetVisibility(true);
+	}
+	else {
+		DestinationMarker->SetVisibility(false);
+	}
 }
 
 // Called to bind functionality to input
