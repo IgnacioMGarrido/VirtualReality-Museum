@@ -3,6 +3,7 @@
 #include "VRCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "Components/InputComponent.h"
+#include "Components/SceneComponent.h"
 
 // Sets default values
 AVRCharacter::AVRCharacter()
@@ -10,8 +11,11 @@ AVRCharacter::AVRCharacter()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	VRRoot = CreateDefaultSubobject<USceneComponent>(TEXT("VRRoot"));
+	VRRoot->SetupAttachment(GetRootComponent());
+
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
-	Camera->SetupAttachment(GetRootComponent());
+	Camera->SetupAttachment(VRRoot);
 }
 
 // Called when the game starts or when spawned
@@ -25,6 +29,13 @@ void AVRCharacter::BeginPlay()
 void AVRCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	FVector NewCameraOffset = Camera->GetComponentLocation() - GetActorLocation();
+	//FVector::VectorPlaneProject(NewCameraOffset, FVector::UpVector);
+	NewCameraOffset.Z = 0;
+	AddActorWorldOffset(NewCameraOffset);
+	VRRoot->AddWorldOffset(-NewCameraOffset);
+
 
 }
 
