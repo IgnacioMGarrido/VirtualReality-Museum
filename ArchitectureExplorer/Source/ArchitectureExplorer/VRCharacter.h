@@ -28,9 +28,17 @@ public:
 private:
 	void MoveForward(float throttle);
 	void MoveRight(float throttle);
-
+	void UpdateDestinationMarker();
 private:
+	UPROPERTY(VisibleAnywhere)
 	class UCameraComponent* Camera;
+	
+	UPROPERTY(VisibleAnywhere)
 	class USceneComponent* VRRoot;
 	
+	UPROPERTY(VisibleAnywhere)
+	class UStaticMeshComponent* DestinationMarker;
+	
+	UPROPERTY(EditAnywhere)
+	float MaxTeleportDistance = 1000.0f;
 };
