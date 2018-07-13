@@ -77,7 +77,43 @@ void AVRCharacter::UpdateBlinkers()
 
 	BlinkerMaterialInstance->SetScalarParameterValue(TEXT("Radius"), Radius);
 
+	FVector2D Centre = GetBlinkerCenter();
+	BlinkerMaterialInstance->SetVectorParameterValue(TEXT("Centre"), FLinearColor(Centre.X, Centre.Y, 0));
 
+
+}
+FVector2D AVRCharacter::GetBlinkerCenter()
+{
+	FVector MovementDirection = GetVelocity().GetSafeNormal();
+	if (MovementDirection.IsNearlyZero() )
+	{
+		return FVector2D(.5f, .5f);
+	}
+
+	FVector WorldStationaryLocation;
+	if (FVector::DotProduct(Camera->GetForwardVector(), MovementDirection) > 0) {
+		WorldStationaryLocation = Camera->GetComponentLocation() + MovementDirection * 1000;
+	}
+	else {
+		WorldStationaryLocation = Camera->GetComponentLocation() - MovementDirection * 1000;
+	}
+
+
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	if (PC == nullptr)
+	{
+		return FVector2D(.5f, .5f);
+	}
+	FVector2D ScreenStationaryLocation;
+	PC->ProjectWorldLocationToScreen(WorldStationaryLocation, ScreenStationaryLocation);
+
+	int32 SizeX, SizeY;
+
+	PC->GetViewportSize(SizeX, SizeY);
+
+	ScreenStationaryLocation.X /= SizeX;
+	ScreenStationaryLocation.Y /= SizeY;
+	return ScreenStationaryLocation;
 }
 void AVRCharacter::UpdateDestinationMarker()
 {
