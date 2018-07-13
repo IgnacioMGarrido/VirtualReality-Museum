@@ -2,16 +2,21 @@
 
 #include "VRCharacter.h"
 #include "Camera/CameraComponent.h"
+#include "Camera/PlayerCameraManager.h"
+
 #include "Components/InputComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/PostProcessComponent.h"
+
 #include "Engine/World.h"
 #include "Public/DrawDebugHelpers.h"
 #include "Public/TimerManager.h"
-#include "Camera/PlayerCameraManager.h"
 #include "AI/Navigation/NavigationSystem.h"
 
+#include "Materials/MaterialInstanceDynamic.h"
+#include "Curves/CurveFloat.h"
 // Sets default values
 AVRCharacter::AVRCharacter()
 {
@@ -27,6 +32,11 @@ AVRCharacter::AVRCharacter()
 
 	DestinationMarker = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DestinationMarker"));
 	DestinationMarker->SetupAttachment(GetRootComponent());
+
+	PostProcessComponent = CreateDefaultSubobject<UPostProcessComponent>(TEXT("PostProcessComponent"));
+	PostProcessComponent->SetupAttachment(GetRootComponent());
+
+
 }
 
 // Called when the game starts or when spawned
@@ -34,6 +44,12 @@ void AVRCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	DestinationMarker->SetVisibility(false);
+
+	if (BlinkerMaterialBase != nullptr) {
+		BlinkerMaterialInstance = UMaterialInstanceDynamic::Create(BlinkerMaterialBase, this);
+		PostProcessComponent->AddOrUpdateBlendable(BlinkerMaterialInstance);
+
+	}
 
 }
 
@@ -49,8 +65,20 @@ void AVRCharacter::Tick(float DeltaTime)
 	VRRoot->AddWorldOffset(-NewCameraOffset);
 
 	UpdateDestinationMarker();
-}
 
+	UpdateBlinkers();
+
+}
+void AVRCharacter::UpdateBlinkers()
+{
+	if (RadiusVsVelocity == nullptr) return;
+	float Speed = GetVelocity().Size();
+	float Radius = RadiusVsVelocity->GetFloatValue(Speed);
+
+	BlinkerMaterialInstance->SetScalarParameterValue(TEXT("Radius"), Radius);
+
+
+}
 void AVRCharacter::UpdateDestinationMarker()
 {
 
@@ -91,6 +119,8 @@ bool AVRCharacter::FindTeleportDestination(FVector & OutLocation)
 
 	return true;
 }
+
+
 
 // Called to bind functionality to input
 void AVRCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

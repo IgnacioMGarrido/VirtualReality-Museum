@@ -28,6 +28,7 @@ public:
 private:
 	void UpdateDestinationMarker();
 	bool FindTeleportDestination(FVector &OutLocation);
+	void UpdateBlinkers();
 
 	void MoveForward(float throttle);
 	void MoveRight(float throttle);
@@ -38,15 +39,27 @@ private:
 	void StartFade(float FromAlpha, float ToAlpha);
 private:
 
-	UPROPERTY(VisibleAnywhere)
-	class UCameraComponent* Camera;
+	UPROPERTY()
+	class UCameraComponent* Camera = nullptr;
 	
-	UPROPERTY(VisibleAnywhere)
-	class USceneComponent* VRRoot;
+	UPROPERTY()
+	class USceneComponent* VRRoot = nullptr;
 	
-	UPROPERTY(VisibleAnywhere)
-	class UStaticMeshComponent* DestinationMarker;
+	UPROPERTY()
+	class UStaticMeshComponent* DestinationMarker = nullptr;
 	
+	UPROPERTY()
+	class UPostProcessComponent* PostProcessComponent = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	class UMaterialInterface* BlinkerMaterialBase = nullptr;
+
+	UPROPERTY()
+	class UMaterialInstanceDynamic* BlinkerMaterialInstance = nullptr;
+
+	UPROPERTY(EditAnywhere)
+	class UCurveFloat* RadiusVsVelocity = nullptr;
+
 	UPROPERTY(EditAnywhere)
 	float MaxTeleportDistance = 1000.0f;
 
@@ -54,6 +67,6 @@ private:
 	float FadeDuration = 1.0f;
 	
 	UPROPERTY(EditAnywhere)
-		FVector TeleportProjectionExtent = FVector(100, 100, 100);
+	FVector TeleportProjectionExtent = FVector(100, 100, 100);
 
 };
