@@ -17,6 +17,8 @@
 
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Curves/CurveFloat.h"
+
+#include "MotionControllerComponent.h"
 // Sets default values
 AVRCharacter::AVRCharacter()
 {
@@ -36,6 +38,13 @@ AVRCharacter::AVRCharacter()
 	PostProcessComponent = CreateDefaultSubobject<UPostProcessComponent>(TEXT("PostProcessComponent"));
 	PostProcessComponent->SetupAttachment(GetRootComponent());
 
+	LeftController = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("LeftController"));
+	LeftController->SetupAttachment(VRRoot);
+	LeftController->SetTrackingSource(EControllerHand::Left);
+
+	RightController = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("RightController"));
+	RightController->SetupAttachment(VRRoot);
+	RightController->SetTrackingSource(EControllerHand::Right);
 
 }
 
@@ -135,8 +144,8 @@ void AVRCharacter::UpdateDestinationMarker()
 bool AVRCharacter::FindTeleportDestination(FVector & OutLocation)
 {
 	FHitResult HitResult;
-	FVector StartLocation = Camera->GetComponentLocation();
-	FVector EndLocation = StartLocation + (Camera->GetForwardVector() * MaxTeleportDistance);
+	FVector StartLocation = RightController->GetComponentLocation();
+	FVector EndLocation = StartLocation + (RightController->GetForwardVector() * MaxTeleportDistance);
 	bool bIsHitLocation = GetWorld()->LineTraceSingleByChannel(
 		HitResult,
 		StartLocation,

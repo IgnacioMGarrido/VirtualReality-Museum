@@ -42,6 +42,12 @@ private:
 
 	UPROPERTY()
 	class UCameraComponent* Camera = nullptr;
+
+	UPROPERTY()
+	class UMotionControllerComponent* LeftController = nullptr;
+	UPROPERTY()
+	UMotionControllerComponent* RightController = nullptr;
+
 	
 	UPROPERTY()
 	class USceneComponent* VRRoot = nullptr;
@@ -52,6 +58,9 @@ private:
 	UPROPERTY()
 	class UPostProcessComponent* PostProcessComponent = nullptr;
 
+
+
+private:
 	UPROPERTY(EditAnywhere)
 	class UMaterialInterface* BlinkerMaterialBase = nullptr;
 
