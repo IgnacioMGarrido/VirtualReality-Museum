@@ -19,6 +19,7 @@
 #include "Curves/CurveFloat.h"
 
 #include "MotionControllerComponent.h"
+#include "Kismet/GameplayStatics.h"
 // Sets default values
 AVRCharacter::AVRCharacter()
 {
@@ -143,20 +144,31 @@ void AVRCharacter::UpdateDestinationMarker()
 
 bool AVRCharacter::FindTeleportDestination(FVector & OutLocation)
 {
-	FHitResult HitResult;
 	FVector StartLocation = RightController->GetComponentLocation();
-	FVector EndLocation = StartLocation + (RightController->GetForwardVector() * MaxTeleportDistance);
-	bool bIsHitLocation = GetWorld()->LineTraceSingleByChannel(
-		HitResult,
-		StartLocation,
-		EndLocation,
-		ECollisionChannel::ECC_Visibility
+	FVector Look = RightController->GetForwardVector();
+
+
+
+	FPredictProjectilePathParams Params(
+		TeleportProjectileRadius, 
+		StartLocation, 
+		Look * TelportProjectileSpeed,
+		TeleportSimulationTime,
+		ECollisionChannel::ECC_Visibility,
+		this
 	);
 
-	if (!bIsHitLocation) return false;
+	Params.DrawDebugType = EDrawDebugTrace::ForOneFrame;
+	Params.bTraceComplex = true; //FIXME: This is to get more collision locations
+
+	FPredictProjectilePathResult PathResult;
+	bool bHit = UGameplayStatics::PredictProjectilePath(this, Params, PathResult);
+
+
+	if (!bHit) return false;
 
 	FNavLocation NavLocation;
-	bool bOnNavMesh = GetWorld()->GetNavigationSystem()->ProjectPointToNavigation(HitResult.Location, NavLocation, TeleportProjectionExtent);
+	bool bOnNavMesh = GetWorld()->GetNavigationSystem()->ProjectPointToNavigation(PathResult.HitResult.Location, NavLocation, TeleportProjectionExtent);
 
 	if (!bOnNavMesh) return false;
 
@@ -204,6 +216,8 @@ void AVRCharacter::TeleportFinish()
 	APlayerController* PC = Cast<APlayerController>(GetController());
 	StartFade(1, 0);
 }
+
+
 
 void AVRCharacter::StartFade(float FromAlpha, float ToAlpha)
 {

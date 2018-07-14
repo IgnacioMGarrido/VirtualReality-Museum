@@ -70,13 +70,21 @@ private:
 	UPROPERTY(EditAnywhere)
 	class UCurveFloat* RadiusVsVelocity = nullptr;
 
-	UPROPERTY(EditAnywhere)
-	float MaxTeleportDistance = 1000.0f;
+	UPROPERTY(EditAnywhere , Category="Teleportation")
+	float TelportProjectileSpeed = 800.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Teleportation")
+	float TeleportProjectileRadius = 10.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Teleportation")
+	float TeleportSimulationTime = 2.0f;
 
 	UPROPERTY(EditAnywhere)
 	float FadeDuration = 1.0f;
 	
 	UPROPERTY(EditAnywhere)
 	FVector TeleportProjectionExtent = FVector(100, 100, 100);
+
+
 
 };
