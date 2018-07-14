@@ -27,8 +27,9 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 private:
 	void UpdateDestinationMarker();
-	bool FindTeleportDestination(FVector &OutLocation);
+	bool FindTeleportDestination(TArray<FVector> &OutPath, FVector &OutLocation);
 	void UpdateBlinkers();
+	void UpdateSplines(const TArray<FVector> &Path);
 	FVector2D GetBlinkerCenter();
 
 	void MoveForward(float throttle);
@@ -47,6 +48,9 @@ private:
 	class UMotionControllerComponent* LeftController = nullptr;
 	UPROPERTY()
 	UMotionControllerComponent* RightController = nullptr;
+
+	UPROPERTY(EditAnywhere, Category = "Teleportation")
+	class USplineComponent* TeleportPath;
 
 	
 	UPROPERTY()

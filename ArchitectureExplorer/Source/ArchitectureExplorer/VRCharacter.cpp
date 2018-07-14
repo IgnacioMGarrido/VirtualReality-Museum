@@ -9,6 +9,7 @@
 #include "Components/SceneComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/PostProcessComponent.h"
+#include "Components/SplineComponent.h"
 
 #include "Engine/World.h"
 #include "Public/DrawDebugHelpers.h"
@@ -46,6 +47,9 @@ AVRCharacter::AVRCharacter()
 	RightController = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("RightController"));
 	RightController->SetupAttachment(VRRoot);
 	RightController->SetTrackingSource(EControllerHand::Right);
+
+	TeleportPath = CreateDefaultSubobject<USplineComponent>(TEXT("TeleportPath"));
+	TeleportPath->SetupAttachment(RightController);
 
 }
 
@@ -92,6 +96,7 @@ void AVRCharacter::UpdateBlinkers()
 
 
 }
+
 FVector2D AVRCharacter::GetBlinkerCenter()
 {
 	FVector MovementDirection = GetVelocity().GetSafeNormal();
@@ -129,20 +134,30 @@ void AVRCharacter::UpdateDestinationMarker()
 {
 
 	FVector Location;
-
-	bool bHasDestination = FindTeleportDestination(Location);
+	TArray<FVector> DestinationPath;
+	bool bHasDestination = FindTeleportDestination(DestinationPath,Location);
 
 	if (bHasDestination) {
 		DestinationMarker->SetWorldLocation(Location);
 		DestinationMarker->SetVisibility(true);
+
+		UpdateSplines(DestinationPath);
 	}
 	else 
 	{
 		DestinationMarker->SetVisibility(false);
 	}
 }
-
-bool AVRCharacter::FindTeleportDestination(FVector & OutLocation)
+void AVRCharacter::UpdateSplines(const TArray<FVector> &Path)
+{
+	TeleportPath->ClearSplinePoints(false);
+	for (int32 i = 0; i < Path.Num(); i++) {
+		FVector LocalPosition = TeleportPath->GetComponentTransform().InverseTransformPosition(Path[i]);
+		TeleportPath->AddPoint(FSplinePoint(i, LocalPosition, ESplinePointType::Curve), false);
+	}
+	TeleportPath->UpdateSpline();
+}
+bool AVRCharacter::FindTeleportDestination(TArray<FVector> &OutPath, FVector &OutLocation)
 {
 	FVector StartLocation = RightController->GetComponentLocation();
 	FVector Look = RightController->GetForwardVector();
@@ -163,9 +178,12 @@ bool AVRCharacter::FindTeleportDestination(FVector & OutLocation)
 
 	FPredictProjectilePathResult PathResult;
 	bool bHit = UGameplayStatics::PredictProjectilePath(this, Params, PathResult);
-
-
 	if (!bHit) return false;
+
+	for (FPredictProjectilePathPointData PointData : PathResult.PathData)
+	{
+		OutPath.Add(PointData.Location);
+	}
 
 	FNavLocation NavLocation;
 	bool bOnNavMesh = GetWorld()->GetNavigationSystem()->ProjectPointToNavigation(PathResult.HitResult.Location, NavLocation, TeleportProjectionExtent);
