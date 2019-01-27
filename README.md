@@ -1,2 +1,3 @@
-# VR Systme
-This is a VR System Experiment
+# VR Museum
+This is a VR Museum created with Unreal Engine for a final college project
+
